@@ -23,10 +23,12 @@ public class PlayerMoveState : PlayerGroundedState
     {
         base.Update();
 
+        player.SetVelocity(xInput * player.moveSpeed, player.rigidBody.velocity.y);
+
+
         if (player.IsWallDetected())
             stateMachine.ChangeState(player.idleState);
-
-        player.SetVelocity(xInput * player.moveSpeed, player.rigidBody.velocity.y);
+        
 
         if (xInput == 0)
             stateMachine.ChangeState(player.idleState);
