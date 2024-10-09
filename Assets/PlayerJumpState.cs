@@ -21,8 +21,8 @@ public class PlayerJumpState : PlayerState
         if (player.rigidBody.velocity.y < 0)
             stateMachine.ChangeState(player.airState);
 
-        //if (xInput != 0)
-            //player.SetVelocity(player.moveSpeed * .8f * xInput, player.rigidBody.velocity.y);
+        if (xInput != 0)
+            player.SetVelocity(player.moveSpeed * .8f * xInput, player.rigidBody.velocity.y);
     }
 
     public override void Exit()

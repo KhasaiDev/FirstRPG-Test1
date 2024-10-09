@@ -5,10 +5,22 @@ using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
+    public PlayerStateMachine stateMachine { get; private set; }
+    #region Componentes
+
+    public Animator anim { get; private set; }
+    public Rigidbody2D rigidBody { get; private set; }
+
+
+    #endregion
+
 
     [Header("Move Info")]
     public float moveSpeed = 12f;
     public float jumpForce;
+    private bool facingRight = true;
+    public int facingDir { get; private set; } = 1;
+
 
     [Header("Dash Info")]
     [SerializeField] private float dashCooldown;
@@ -16,6 +28,9 @@ public class Player : MonoBehaviour
     public float dashSpeed;
     public float dashDuration;
     public float dashDirection { get; private set; }
+    
+
+
 
     [Header("Collision Info")]
     [SerializeField] private Transform groundCheck;
@@ -25,23 +40,7 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask whatIsGround;
 
 
-    public int facingDir { get; private set; } = 1;
-    private bool facingRight = true;
 
-
-    #region Instancias
-
-    public PlayerStateMachine stateMachine { get; private set; }
-
-
-    #endregion
-    #region Componentes
-
-    public Animator anim { get; private set; }
-    public Rigidbody2D rigidBody { get; private set; }
-
-
-    #endregion
     #region Estados
 
     public PlayerIdleState idleState { get; private set; }
@@ -51,11 +50,11 @@ public class Player : MonoBehaviour
     public PlayerDashState dashState { get; private set; }
     public PlayerDashStopState dashStopState { get; private set; }
     public PlayerWallSlideState wallSlideState { get; private set; }
+    public PlayerWallJumpState wallJumpState { get; private set; }
     
 
 
     #endregion
-
 
 
     private void Awake()
@@ -69,6 +68,7 @@ public class Player : MonoBehaviour
         dashState = new PlayerDashState(this, stateMachine, "Dash");
         dashStopState = new PlayerDashStopState(this, stateMachine, "DashStop");
         wallSlideState = new PlayerWallSlideState(this, stateMachine, "WallSlide");
+        wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
        
     }
 
@@ -91,12 +91,26 @@ public class Player : MonoBehaviour
 
 
     //OTHER FUNCTIONS:
+
+    #region Ground & Wall Detection
     public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
     public bool IsWallDetected() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallCheckDistance, whatIsGround);
 
+    #endregion
+    #region Ground & Wall Gizmos
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
+        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance * facingDir, wallCheck.position.y));
+    }
+
+    #endregion
     #region Dash Input
     private void CheckForDashInput()
     {
+        if (IsWallDetected())
+            return;
+
         dashUsageTimer -= Time.deltaTime;   
         if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0)
         {
@@ -119,15 +133,7 @@ public class Player : MonoBehaviour
         FlipController(_xVelocity);
     }
     #endregion
-    #region Gizmos Wall y Ground
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
-        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y));
-    }
-
-    #endregion
-    #region Flip n Controller
+    #region Flip Info
 
     public void Flip()
     {

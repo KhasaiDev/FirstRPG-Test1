@@ -19,6 +19,7 @@ public class PlayerGroundedState : PlayerState
     {
         base.Update();
 
+
         if (!player.IsGroundDetected())
             stateMachine.ChangeState(player.airState);
 
