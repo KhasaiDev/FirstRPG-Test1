@@ -8,6 +8,17 @@ public class PlayerState
     protected Player player;
     private string animBoolName;
 
+    #region Input Info
+
+    protected float xInput;
+    protected float yInput;
+
+    #endregion
+
+    protected float timer;
+
+    protected bool triggerCalled;
+
     public PlayerState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName)
     {
         this.stateMachine = _stateMachine;
@@ -15,23 +26,13 @@ public class PlayerState
         this.animBoolName = _animBoolName;
     }
 
-    #region Input Info
-
-    protected float xInput;
-    protected float yInput;
-
-    #endregion
-    #region Dash Timer
-
-    protected float timer;
-
-    #endregion
 
 
 
     public virtual void Enter() 
     {
         player.anim.SetBool(animBoolName, true); 
+        triggerCalled = false;
     }
     
     public virtual void Update() 
@@ -45,5 +46,10 @@ public class PlayerState
     public virtual void Exit() 
     {
         player.anim.SetBool(animBoolName, false); 
+    }
+
+    public virtual void AnimationTriggerFinish()
+    {
+        triggerCalled = true;
     }
 }

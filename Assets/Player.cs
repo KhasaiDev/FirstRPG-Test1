@@ -52,6 +52,8 @@ public class Player : MonoBehaviour
     public PlayerDashStopState dashStopState { get; private set; }
     public PlayerWallSlideState wallSlideState { get; private set; }
     public PlayerWallJumpState wallJumpState { get; private set; }
+
+    public PlayerPrimaryAttack primaryAttack { get; private set; }
     
 
 
@@ -70,7 +72,10 @@ public class Player : MonoBehaviour
         dashStopState = new PlayerDashStopState(this, stateMachine, "DashStop");
         wallSlideState = new PlayerWallSlideState(this, stateMachine, "WallSlide");
         wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
-       
+
+        primaryAttack = new PlayerPrimaryAttack(this, stateMachine, "Attack");
+
+
     }
 
 
@@ -92,6 +97,7 @@ public class Player : MonoBehaviour
 
 
     //OTHER FUNCTIONS:
+    public void AnimationTrigger() => stateMachine.currentState.AnimationTriggerFinish();
 
     #region Ground & Wall Detection
     public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
