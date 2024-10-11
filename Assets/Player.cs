@@ -5,14 +5,20 @@ using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
-    public PlayerStateMachine stateMachine { get; private set; }
     #region Componentes
 
+    public PlayerStateMachine stateMachine { get; private set; }
     public Animator anim { get; private set; }
     public Rigidbody2D rigidBody { get; private set; }
 
 
     #endregion
+    public bool isBussy { get; private set; }
+
+
+
+    [Header("Attack Info")]
+    public float[] attackMovement;
 
 
     [Header("Move Info")]
@@ -28,8 +34,6 @@ public class Player : MonoBehaviour
     public float dashSpeed;
     public float dashDuration;
     public float dashDirection { get; private set; }
-    
-
 
 
     [Header("Collision Info")]
@@ -53,7 +57,7 @@ public class Player : MonoBehaviour
     public PlayerWallSlideState wallSlideState { get; private set; }
     public PlayerWallJumpState wallJumpState { get; private set; }
 
-    public PlayerPrimaryAttack primaryAttack { get; private set; }
+    public PlayerAttackState primaryAttack { get; private set; }
     
 
 
@@ -73,7 +77,7 @@ public class Player : MonoBehaviour
         wallSlideState = new PlayerWallSlideState(this, stateMachine, "WallSlide");
         wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
 
-        primaryAttack = new PlayerPrimaryAttack(this, stateMachine, "Attack");
+        primaryAttack = new PlayerAttackState(this, stateMachine, "Attack");
 
 
     }
@@ -97,8 +101,29 @@ public class Player : MonoBehaviour
 
 
     //OTHER FUNCTIONS:
+
+    #region ZeroVelocity
+
+    public void ZeroVelocity() 
+    {
+        rigidBody.velocity = new Vector2(0, 0);
+    }
+
+    #endregion
+    #region Corrutina isBussy
+
+    public IEnumerator BussyFor(float _secodnds) 
+    {
+        isBussy = true;
+        yield return new WaitForSeconds(_secodnds);
+        isBussy = false;
+    }
+
+    #endregion
+    #region Animation Finish Trigger
     public void AnimationTrigger() => stateMachine.currentState.AnimationTriggerFinish();
 
+    #endregion
     #region Ground & Wall Detection
     public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
     public bool IsGround2Detected() => Physics2D.Raycast(groundCheck2.position, Vector2.down, groundCheckDistance, whatIsGround);
