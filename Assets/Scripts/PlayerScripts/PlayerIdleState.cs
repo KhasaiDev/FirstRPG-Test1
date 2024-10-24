@@ -19,6 +19,9 @@ public class PlayerIdleState : PlayerGroundedState
     {
         base.Update();
 
+        if (yInput < 0)
+            stateMachine.ChangeState(player.enterKneelState);
+
         if (xInput == player.facingDir && player.IsWallDetected())
             return;
 

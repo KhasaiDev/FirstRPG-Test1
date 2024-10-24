@@ -28,7 +28,9 @@ public class PlayerMoveState : PlayerGroundedState
 
         if (player.IsWallDetected())
             stateMachine.ChangeState(player.idleState);
-        
+
+        if (yInput < 0)
+            stateMachine.ChangeState(player.enterKneelState);
 
         if (xInput == 0)
             stateMachine.ChangeState(player.idleState);

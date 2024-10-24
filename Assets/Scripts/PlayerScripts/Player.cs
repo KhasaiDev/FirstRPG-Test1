@@ -56,6 +56,8 @@ public class Player : MonoBehaviour
     public PlayerDashStopState dashStopState { get; private set; }
     public PlayerWallSlideState wallSlideState { get; private set; }
     public PlayerWallJumpState wallJumpState { get; private set; }
+    public PlayerEnterKneelState enterKneelState { get; private set; }
+    public PlayerInKneelState kneelState { get; private set; }
 
     public PlayerAttackState primaryAttack { get; private set; }
     
@@ -76,9 +78,11 @@ public class Player : MonoBehaviour
         dashStopState = new PlayerDashStopState(this, stateMachine, "DashStop");
         wallSlideState = new PlayerWallSlideState(this, stateMachine, "WallSlide");
         wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
+        enterKneelState = new PlayerEnterKneelState(this, stateMachine, "EnterKneel");
+        kneelState = new PlayerInKneelState(this, stateMachine, "InKneel");
+       
 
         primaryAttack = new PlayerAttackState(this, stateMachine, "Attack");
-
 
     }
 
