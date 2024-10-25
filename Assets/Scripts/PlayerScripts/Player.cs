@@ -5,6 +5,9 @@ using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
+    public bool isBussy { get; private set; }
+
+    //Aqui van los componentes del GameObject Player
     #region Componentes
 
     public PlayerStateMachine stateMachine { get; private set; }
@@ -13,8 +16,6 @@ public class Player : MonoBehaviour
 
 
     #endregion
-    public bool isBussy { get; private set; }
-
 
 
     [Header("Attack Info")]
@@ -22,9 +23,13 @@ public class Player : MonoBehaviour
 
 
     [Header("Move Info")]
-    public float moveSpeed = 12f;
+    public float moveSpeed;
     public float jumpForce;
     private bool facingRight = true;
+    [HideInInspector] public float fallMultiplier;
+    [HideInInspector] public float lowJumpMultiplier;
+    [HideInInspector] public float coyoteTime = 0.1f;
+    [HideInInspector] public float coyoteTimeCounter;
     public int facingDir { get; private set; } = 1;
 
 
@@ -43,9 +48,12 @@ public class Player : MonoBehaviour
     [SerializeField] private float wallCheckDistance;
     [SerializeField] private LayerMask whatIsGround;
     [SerializeField] private Transform groundCheck2;
+    [SerializeField] private Transform kneelWallCheck;
+    [SerializeField] private float kneelWallCheckDistance;
 
 
 
+    //Primero instanciar los estados aqui
     #region Estados
 
     public PlayerIdleState idleState { get; private set; }
@@ -58,12 +66,16 @@ public class Player : MonoBehaviour
     public PlayerWallJumpState wallJumpState { get; private set; }
     public PlayerEnterKneelState enterKneelState { get; private set; }
     public PlayerInKneelState kneelState { get; private set; }
+    public PlayerDashKneelState dashKneel { get; private set; }
 
     public PlayerAttackState primaryAttack { get; private set; }
-    
+
 
 
     #endregion
+
+    //Luego los iniciamos aqui
+    #region Awake
 
 
     private void Awake()
@@ -80,13 +92,17 @@ public class Player : MonoBehaviour
         wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
         enterKneelState = new PlayerEnterKneelState(this, stateMachine, "EnterKneel");
         kneelState = new PlayerInKneelState(this, stateMachine, "InKneel");
+        dashKneel = new PlayerDashKneelState(this, stateMachine, "DashKneel");
        
 
         primaryAttack = new PlayerAttackState(this, stateMachine, "Attack");
 
     }
 
+    #endregion
 
+    //Aqui iniciamos los componentes
+    #region Start
     private void Start()
     {
         anim = GetComponentInChildren<Animator>();
@@ -94,7 +110,9 @@ public class Player : MonoBehaviour
         stateMachine.Initialize(idleState);
     }
 
- 
+    #endregion
+
+
     private void Update()
     {
         stateMachine.currentState.Update();
@@ -102,9 +120,7 @@ public class Player : MonoBehaviour
     }
 
 
-
-
-    //OTHER FUNCTIONS:
+    //Otras Funciones:
 
     #region ZeroVelocity
 
@@ -132,6 +148,8 @@ public class Player : MonoBehaviour
     public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
     public bool IsGround2Detected() => Physics2D.Raycast(groundCheck2.position, Vector2.down, groundCheckDistance, whatIsGround);
     public bool IsWallDetected() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallCheckDistance, whatIsGround);
+    public bool IsKneelWallDetected() => Physics2D.Raycast(kneelWallCheck.position, Vector2.right * facingDir, kneelWallCheckDistance, whatIsGround);
+
 
     #endregion
     #region Ground & Wall Gizmos
@@ -140,6 +158,7 @@ public class Player : MonoBehaviour
         Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
         Gizmos.DrawLine(groundCheck2.position, new Vector3(groundCheck2.position.x, groundCheck2.position.y - groundCheckDistance));
         Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance * facingDir, wallCheck.position.y));
+        Gizmos.DrawLine(kneelWallCheck.position, new Vector3(kneelWallCheck.position.x + kneelWallCheckDistance * facingDir, kneelWallCheck.position.y));
     }
 
     #endregion
@@ -149,17 +168,29 @@ public class Player : MonoBehaviour
         if (IsWallDetected())
             return;
 
-        dashUsageTimer -= Time.deltaTime;   
-        if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0)
+        dashUsageTimer -= Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0 && stateMachine.currentState == kneelState)
         {
             dashUsageTimer = dashCooldown;
             dashDirection = Input.GetAxisRaw("Horizontal");
 
-            if (dashDirection == 0) 
-                dashDirection = facingDir;            
-            
+            if (dashDirection == 0)
+                dashDirection = facingDir;
+            FlipController(dashDirection);
+
+            stateMachine.ChangeState(dashKneel);
+        }
+        else if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0)
+        {
+            dashUsageTimer = dashCooldown;
+            dashDirection = Input.GetAxisRaw("Horizontal");
+
+            if (dashDirection == 0)
+                dashDirection = facingDir;
+            FlipController(dashDirection);
             stateMachine.ChangeState(dashState);
         }
+        
     }
 
     #endregion
@@ -181,7 +212,7 @@ public class Player : MonoBehaviour
     }
 
 
-    private void FlipController(float _x)
+    public void FlipController(float _x)
     {
         if (_x > 0 && !facingRight)
             Flip();

@@ -4,19 +4,25 @@ using UnityEngine;
 
 public class PlayerEnterKneelState : PlayerGroundedState
 {
+    #region Constructor
     public PlayerEnterKneelState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
     {
     }
+    #endregion
 
     public override void Enter()
     {
         base.Enter();
-        timer = .3f;
+
+        // Establece la duración del estado/animacion
+        timer = .1f;
     }
 
     public override void Update()
     {
         base.Update();
+
+        //Al terminar la animacion vamos al estado de agachados
         if (timer < 0)
             stateMachine.ChangeState(player.kneelState);
     }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerInKneelState : PlayerGroundedState
+public class PlayerInKneelState : PlayerState
 {
     public PlayerInKneelState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName) : base(_player, _stateMachine, _animBoolName)
     {
@@ -11,15 +11,29 @@ public class PlayerInKneelState : PlayerGroundedState
     public override void Enter()
     {
         base.Enter();
+        
+
     }
 
     public override void Update()
     {
         base.Update();
-        player.ZeroVelocity();
+        // Solo voltea en la dirección del input, pero no aplica movimiento
+        if (xInput != 0)
+        {
+            player.FlipController(xInput);  // Voltea el personaje hacia la dirección del input
+        }
 
-        if (yInput >= 0)
+
+        if (Input.GetKeyUp(KeyCode.S) && xInput == 0)
             stateMachine.ChangeState(player.idleState);
+
+        if (Input.GetKeyUp(KeyCode.S) && xInput != 0)
+            stateMachine.ChangeState(player.moveState);
+
+        if (!player.IsGroundDetected() && player.IsKneelWallDetected())
+            stateMachine.ChangeState(player.wallSlideState);
+
     }
 
     public override void Exit()

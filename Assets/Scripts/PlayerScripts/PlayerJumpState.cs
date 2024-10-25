@@ -18,6 +18,11 @@ public class PlayerJumpState : PlayerState
     public override void Update()
     {
         base.Update();
+        if (player.rigidBody.velocity.y > 0 && !Input.GetButton("Jump"))
+        {
+            player.rigidBody.velocity += Vector2.up * Physics2D.gravity.y * (player.lowJumpMultiplier - 1) * Time.deltaTime;
+        }
+
         if (player.rigidBody.velocity.y < 0)
             stateMachine.ChangeState(player.airState);
 

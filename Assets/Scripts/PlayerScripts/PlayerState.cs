@@ -4,20 +4,8 @@ using UnityEngine;
 
 public class PlayerState 
 {
-    protected PlayerStateMachine stateMachine;
-    protected Player player;
-    private string animBoolName;
 
-    #region Input Info
-
-    protected float xInput;
-    protected float yInput;
-
-    #endregion
-
-    protected float timer;
-
-    protected bool triggerCalled;
+    #region Constructor
 
     public PlayerState(Player _player, PlayerStateMachine _stateMachine, string _animBoolName)
     {
@@ -26,7 +14,26 @@ public class PlayerState
         this.animBoolName = _animBoolName;
     }
 
+    #endregion
+    #region Instancias
 
+    protected PlayerStateMachine stateMachine;
+    protected Player player;
+    private string animBoolName;
+
+    #endregion
+    #region Input Info
+
+    protected float xInput;
+    protected float yInput;
+
+    #endregion
+    #region Otros
+
+    protected float timer;
+    protected bool triggerCalled;
+
+    #endregion
 
 
     public virtual void Enter() 
