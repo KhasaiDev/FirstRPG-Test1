@@ -19,6 +19,7 @@ public class PlayerAttackState : PlayerState
     public override void Enter()
     {
         base.Enter();
+        xInput = 0; // Necesitamos resetear esto para evitar el bug de voltearnos al golpear
 
         // Agregamos un timer que establece cuando dura la animacion de este estado
         timer = .1f;

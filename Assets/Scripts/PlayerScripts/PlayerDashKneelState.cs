@@ -37,7 +37,7 @@ public class PlayerDashKneelState : PlayerState
 
 
         // Cambia al estado de deslizarse por la pared si no se detecta suelo y se detecta una pared
-        if (!player.IsGroundDetected() && player.IsKneelWallDetected())
+        if (!player.IsFrontGroundDetected() && player.IsKneelWallDetected())
             stateMachine.ChangeState(player.wallSlideState);
 
     }

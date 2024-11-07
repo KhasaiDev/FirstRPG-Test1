@@ -24,7 +24,7 @@ public class PlayerGroundedState : PlayerState
         base.Update();
 
         // Restablece el contador de coyote time si el jugador está en el suelo
-        if (player.IsGroundDetected() || player.IsGround2Detected())
+        if (player.IsFrontGroundDetected() || player.IsBackGroundDetected())
             player.coyoteTimeCounter = player.coyoteTime;
         else
             player.coyoteTimeCounter -= Time.deltaTime; // Disminuye el contador si no está tocando el suelo
@@ -41,8 +41,11 @@ public class PlayerGroundedState : PlayerState
         
 
         // Si el jugador no está tocando el suelo y se acabó el coyote time, transita al estado aéreo
-        if (!player.IsGroundDetected() && !player.IsGround2Detected() && player.coyoteTimeCounter <= 0)
+        if (!player.IsFrontGroundDetected() && !player.IsBackGroundDetected() && player.coyoteTimeCounter <= 0)
             stateMachine.ChangeState(player.airState);
+
+        if(Input.GetKeyDown(KeyCode.Q))
+            stateMachine.ChangeState(player.counterAttack);
         
         
     }

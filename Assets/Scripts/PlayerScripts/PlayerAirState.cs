@@ -32,7 +32,7 @@ public class PlayerAirState : PlayerState
 
 
         // Si el jugador toca el suelo, transita al estado de idle o de movimiento
-        if (player.IsGroundDetected() || player.IsGround2Detected())
+        if (player.IsFrontGroundDetected() || player.IsBackGroundDetected())
             stateMachine.ChangeState(player.idleState);
         
 

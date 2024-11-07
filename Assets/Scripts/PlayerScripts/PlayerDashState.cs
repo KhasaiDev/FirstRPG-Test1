@@ -23,7 +23,7 @@ public class PlayerDashState : PlayerState
         base.Update();
 
         // Si no hay suelo pero se detecta una pared, cambia al estado de deslizarse por la pared
-        if (!player.IsGroundDetected() && player.IsWallDetected())
+        if (!player.IsFrontGroundDetected() && player.IsWallDetected())
             stateMachine.ChangeState(player.wallSlideState);
 
 

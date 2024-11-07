@@ -31,7 +31,7 @@ public class PlayerInKneelState : PlayerState
         if (Input.GetKeyUp(KeyCode.S) && xInput != 0)
             stateMachine.ChangeState(player.moveState);
 
-        if (!player.IsGroundDetected() && player.IsKneelWallDetected())
+        if (!player.IsFrontGroundDetected() && player.IsKneelWallDetected())
             stateMachine.ChangeState(player.wallSlideState);
 
     }

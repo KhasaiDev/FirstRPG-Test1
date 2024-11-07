@@ -3,34 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
+    public PlayerStateMachine stateMachine { get; private set; }
     public bool isBussy { get; private set; }
 
-    //Aqui van los componentes del GameObject Player
-    #region Componentes
-
-    public PlayerStateMachine stateMachine { get; private set; }
-    public Animator anim { get; private set; }
-    public Rigidbody2D rigidBody { get; private set; }
-
-
-    #endregion
 
 
     [Header("Attack Info")]
     public float[] attackMovement;
+    public float counterAttackDuration;
 
 
     [Header("Move Info")]
     public float moveSpeed;
     public float jumpForce;
-    private bool facingRight = true;
-    [HideInInspector] public float fallMultiplier;
-    [HideInInspector] public float lowJumpMultiplier;
+    [SerializeField] public float fallMultiplier;
+    [SerializeField] public float lowJumpMultiplier;
     [HideInInspector] public float coyoteTime = 0.1f;
     [HideInInspector] public float coyoteTimeCounter;
-    public int facingDir { get; private set; } = 1;
 
 
     [Header("Dash Info")]
@@ -41,13 +32,7 @@ public class Player : MonoBehaviour
     public float dashDirection { get; private set; }
 
 
-    [Header("Collision Info")]
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckDistance;
-    [SerializeField] private Transform wallCheck;
-    [SerializeField] private float wallCheckDistance;
-    [SerializeField] private LayerMask whatIsGround;
-    [SerializeField] private Transform groundCheck2;
+    [Header("Player Collision Info")]
     [SerializeField] private Transform kneelWallCheck;
     [SerializeField] private float kneelWallCheckDistance;
 
@@ -69,6 +54,7 @@ public class Player : MonoBehaviour
     public PlayerDashKneelState dashKneel { get; private set; }
 
     public PlayerAttackState primaryAttack { get; private set; }
+    public PlayerCounterAttackState counterAttack { get; private set; }
 
 
 
@@ -78,7 +64,7 @@ public class Player : MonoBehaviour
     #region Awake
 
 
-    private void Awake()
+    protected override void Awake()
     {
         stateMachine = new PlayerStateMachine();
 
@@ -96,40 +82,32 @@ public class Player : MonoBehaviour
        
 
         primaryAttack = new PlayerAttackState(this, stateMachine, "Attack");
+        counterAttack = new PlayerCounterAttackState(this, stateMachine, "CounterAttack");
 
     }
 
     #endregion
 
-    //Aqui iniciamos los componentes
+    //Aqui iniciamos los componentes (desde el entity)
     #region Start
-    private void Start()
+    protected override void Start()
     {
-        anim = GetComponentInChildren<Animator>();
-        rigidBody = GetComponentInParent<Rigidbody2D>();
+        base.Start();
         stateMachine.Initialize(idleState);
     }
 
     #endregion
 
 
-    private void Update()
+    protected override void Update()
     {
-        stateMachine.currentState.Update();
+        base.Update();  
+        stateMachine.currentState.Update(); //Aqui accedemos al Update del Estado actual que la StateMachine se encuentre ejecutando y usamos ese Update para darle vida al player
         CheckForDashInput();    
     }
 
 
     //Otras Funciones:
-
-    #region ZeroVelocity
-
-    public void ZeroVelocity() 
-    {
-        rigidBody.velocity = new Vector2(0, 0);
-    }
-
-    #endregion
     #region Corrutina isBussy
 
     public IEnumerator BussyFor(float _secodnds) 
@@ -144,20 +122,12 @@ public class Player : MonoBehaviour
     public void AnimationTrigger() => stateMachine.currentState.AnimationTriggerFinish();
 
     #endregion
-    #region Ground & Wall Detection
-    public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
-    public bool IsGround2Detected() => Physics2D.Raycast(groundCheck2.position, Vector2.down, groundCheckDistance, whatIsGround);
-    public bool IsWallDetected() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallCheckDistance, whatIsGround);
+    #region Wall Detection in Kneel
     public bool IsKneelWallDetected() => Physics2D.Raycast(kneelWallCheck.position, Vector2.right * facingDir, kneelWallCheckDistance, whatIsGround);
 
-
-    #endregion
-    #region Ground & Wall Gizmos
-    private void OnDrawGizmos()
+    protected override void OnDrawGizmos()
     {
-        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
-        Gizmos.DrawLine(groundCheck2.position, new Vector3(groundCheck2.position.x, groundCheck2.position.y - groundCheckDistance));
-        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance * facingDir, wallCheck.position.y));
+        base.OnDrawGizmos();
         Gizmos.DrawLine(kneelWallCheck.position, new Vector3(kneelWallCheck.position.x + kneelWallCheckDistance * facingDir, kneelWallCheck.position.y));
     }
 
@@ -194,33 +164,8 @@ public class Player : MonoBehaviour
     }
 
     #endregion
-    #region SetVelocity
-  
-    public void SetVelocity(float _xVelocity, float _yVelocity)
-    {
-        rigidBody.velocity = new Vector2(_xVelocity, _yVelocity);
-        FlipController(_xVelocity);
-    }
-    #endregion
-    #region Flip Info
-
-    public void Flip()
-    {
-        facingDir = facingDir * -1;
-        facingRight = !facingRight;
-        transform.Rotate(0,180,0);
-    }
 
 
-    public void FlipController(float _x)
-    {
-        if (_x > 0 && !facingRight)
-            Flip();
-        else if (_x < 0 && facingRight)
-            Flip();
-    }
-
-    #endregion
 
 }
 

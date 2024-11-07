@@ -34,7 +34,7 @@ public class PlayerWallSlideState : PlayerState
 
 
         //Al tocar el suelo saldremos al idle
-        if(player.IsGroundDetected())
+        if(player.IsFrontGroundDetected())
             stateMachine.ChangeState(player.idleState);
 
 

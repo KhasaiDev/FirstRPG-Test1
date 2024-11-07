@@ -25,6 +25,9 @@ public class PlayerDashStopState : PlayerGroundedState
     public override void Update()
     {
         base.Update();
+        //Esto para evitar hacer la animacion al caer y no presionar inputs
+        if (!player.IsFrontGroundDetected() || !player.IsBackGroundDetected())
+            stateMachine.ChangeState(player.airState);
 
         // Si el tiempo ha terminado, cambia al estado de inactividad
         if (timer < 0)
